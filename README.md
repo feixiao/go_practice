@@ -1,6 +1,11 @@
 # go_practice
 Go基础库整理
 
+
+#### 服务框架Demo
++ [apiserver](https://github.com/feixiao/apiserver) demo for jupiter.
++ [apiserver_demos](https://github.com/feixiao/apiserver_demos) demo for gin.
++ [datacenter](https://github.com/feixiao/datacenter) demo for go-zero.
 ### 常用库
 #### 日志
 + [logrus](https://github.com/Sirupsen/logrus)
