@@ -9,7 +9,7 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${command:cmake.launchTargetPath}",
-            "args": ["-f", "${workspaceFolder}/compression/data/test.txt.cmpr"],
+            "args": ["-f", "${workspaceFolder}/compression/data/test.txt.cmpr.gz"],
             "stopAtEntry": false,
             "cwd": "${workspaceFolder}/compression/uncompression",
             "environment": [
