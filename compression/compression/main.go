@@ -20,8 +20,10 @@ func (argv *argT) AutoHelp() bool {
 	return argv.Help
 }
 
-// ./comporession -f ../data/test.txt -c=true
-// ./comporession -f ../data/test.txt.cmpr
+// ./compression -f ../data/test.txt -c=true
+// ./compression -f ../data/test.txt.cmpr
+
+// 标准工具： gzip -d ../data/test.txt.gz
 func main() {
 	args := &argT{}
 

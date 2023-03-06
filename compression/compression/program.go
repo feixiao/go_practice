@@ -49,7 +49,7 @@ func (p *Program) Start() error {
 			return errors.WithMessage(err, "Comporess failed")
 		}
 
-		saveFile := p.file + ".cmpr"
+		saveFile := p.file + ".gz"
 		if err := ioutil.WriteFile(saveFile, *cData, 0644); err != nil {
 			return errors.WithMessagef(err, "write file:%s failed", saveFile)
 		}
@@ -61,7 +61,7 @@ func (p *Program) Start() error {
 			return errors.WithMessage(err, "UnComporess failed")
 		}
 
-		saveFile := p.file + ".ucmpr"
+		saveFile := p.file + ".txt"
 		if err := ioutil.WriteFile(saveFile, *uData, 0644); err != nil {
 			return errors.WithMessagef(err, "write file:%s failed", saveFile)
 		}

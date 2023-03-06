@@ -2,14 +2,14 @@ package main
 
 import (
 	"bytes"
-	"compress/zlib"
+	"compress/gzip"
 	"io/ioutil"
 	"log"
 )
 
 func Comporession(data []byte) (*[]byte, error) {
 	var buf bytes.Buffer
-	w := zlib.NewWriter(&buf)
+	w := gzip.NewWriter(&buf)
 	if _, err := w.Write(data); err != nil {
 		return nil, err
 	}
@@ -23,7 +23,7 @@ func Comporession(data []byte) (*[]byte, error) {
 
 func UnComporession(data []byte) (*[]byte, error) {
 	b := bytes.NewReader(data)
-	r, err := zlib.NewReader(b)
+	r, err := gzip.NewReader(b)
 	if err != nil {
 		return nil, err
 	}
