@@ -73,11 +73,28 @@ void test() {
     
     //设置加密秘银
     printf("\r\n\r\n\r\nAES CBC:\r\nBefore Encryption: %s\r\n", plain);
+    
+    // int mbedtls_aes_setkey_enc( mbedtls_aes_context *ctx, const unsigned char *key, unsigned int keybits );
+    // int mbedtls_aes_setkey_dec( mbedtls_aes_context *ctx, const unsigned char *key, unsigned int keybits );
+
+    // ctx：句柄
+    // key：密钥，必须16、24或32Bytes
+    // keybits：密钥长度，128、192或256bit
+
     mbedtls_aes_setkey_enc( &aes_ctx, key, 128);
     for(i = 0; i < 16; i++)
     {
         iv[i] = 0x01;
     }
+
+    // CBC加/解密，可以加密任意长度的明文（必须补齐为16的整倍数）
+    // int mbedtls_aes_crypt_cbc( mbedtls_aes_context *ctx,
+    //                 int mode,                // MBEDTLS_AES_ENCRYPT或MBEDTLS_AES_DECRYPT
+    //                 size_t length,           // 输入长度（必须补齐为16的整倍数）
+    //                 unsigned char iv[16],    // 初始化向量，必须为16字节且可读写。每个块运算完之后会生成新的向量传给下一个块运算，所以加密完成后此值会改变，解密时应该重新赋值。
+    //                 const unsigned char *input,
+    //                 unsigned char *output );
+
     mbedtls_aes_crypt_cbc(&aes_ctx, MBEDTLS_AES_ENCRYPT, 64, iv, plain, cipher);
     printf("After encryption:");
     for (i = 0; i<64; i++)
