@@ -6,21 +6,29 @@
 int aes_cbc_encrypt(const std::string& plaintext, const std::string& key, 
      const std::string& iv, std::string& ciphertext) {
     
+    if (ciphertext.size() < plaintext.size()) {
+        ciphertext.resize(plaintext.size());
+    }
+
     std::string tmp_iv(iv);
 
-        //密文空间
-    unsigned char cipher[64]={0};
+    const unsigned char* input = ( const unsigned char*)plaintext.data();
+
+    unsigned char* output = (unsigned char*)ciphertext.data();
 
     mbedtls_aes_context ctx;
     mbedtls_aes_init(&ctx);
     
 
-    int rc = mbedtls_aes_setkey_dec(&ctx, (const unsigned char*)key.data(), key.size());
+    int rc = mbedtls_aes_setkey_enc(&ctx, (const unsigned char*)key.data(), key.size() * 8);
     if( rc !=0 ) {
         return rc;
     }
 
-    rc = mbedtls_aes_crypt_cbc(&ctx, MBEDTLS_AES_DECRYPT, 64, iv, cipher, ciphertext);
+    // MBEDTLS_ERR_AES_INVALID_INPUT_LENGTH -0x0022
+    rc = mbedtls_aes_crypt_cbc(&ctx, MBEDTLS_AES_ENCRYPT, 
+            plaintext.size(),   (unsigned char*)tmp_iv.data(),
+            input,output);
     if( rc != 0) {
         return rc;
     }
@@ -48,7 +56,7 @@ int aes_cbc_decrypt(const std::string& ciphertext, const std::string& key, const
     mbedtls_aes_context ctx;
     mbedtls_aes_init(&ctx);
 
-    rc = mbedtls_aes_setkey_dec(&ctx, (const unsigned char*)key.data(), key.size());
+    rc = mbedtls_aes_setkey_dec(&ctx, (const unsigned char*)key.data(), key.size() * 8);
 
     rc = mbedtls_aes_crypt_cbc(&ctx,
         MBEDTLS_AES_DECRYPT,
@@ -58,27 +66,27 @@ int aes_cbc_decrypt(const std::string& ciphertext, const std::string& key, const
         output);
 
     // 兼容openssl, 填充位填充的数据为填充的长度
-    {
-        int fill_len = output[plaintext.size() - 1];
-        if (fill_len > 0 && fill_len < 16)
-        {
-            bool is_ok = true;
-            for (size_t i = plaintext.size() - fill_len; i < plaintext.size(); i++)
-            {
-                if (output[i] != fill_len) {
-                    is_ok = false;
-                    break;
-                }
-            }
+    // {
+    //     int fill_len = output[plaintext.size() - 1];
+    //     if (fill_len > 0 && fill_len < 16)
+    //     {
+    //         bool is_ok = true;
+    //         for (size_t i = plaintext.size() - fill_len; i < plaintext.size(); i++)
+    //         {
+    //             if (output[i] != fill_len) {
+    //                 is_ok = false;
+    //                 break;
+    //             }
+    //         }
 
-            if (is_ok) {
-                plaintext.resize(plaintext.size() - fill_len);
-            }
-            else {
-                rc = -2;
-            }
-        }
-    }
+    //         if (is_ok) {
+    //             plaintext.resize(plaintext.size() - fill_len);
+    //         }
+    //         else {
+    //             rc = -2;
+    //         }
+    //     }
+    // }
 
     mbedtls_aes_free(&ctx);
 

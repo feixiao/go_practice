@@ -10,6 +10,8 @@ using namespace std;
 
 void test();
 
+void test2();
+
 int main(int argc, char* argv[]) {
 
     int o = 0;
@@ -28,6 +30,7 @@ int main(int argc, char* argv[]) {
         }
     }
     test();
+    test2();
 
     std::string data("12345678900987654321");
 
@@ -65,6 +68,7 @@ void test() {
     unsigned char plain[64] = "ZhangShiSan!!ZhangShiSan!!ZhangShiSan!!ZhangShiSan!!";
     //解密后明文的空间
     unsigned char dec_plain[64]={0};
+
     //密文空间
     unsigned char cipher[64]={0};
  
@@ -113,4 +117,40 @@ void test() {
     printf("After Decrypt %s\r\n", dec_plain);
     printf("\r\n");
     mbedtls_aes_free( &aes_ctx );
+}
+
+
+void test2() {
+    std::string tmp("OGU1NTlmZDA2MmJmMWI5MGYwMjBmOTUzMTBiYWEyNDI");
+    int count = 16;
+    std::string key = tmp.substr(0,count);
+
+    printf("key size : %d, key : %s\n", key.size(), key.c_str());
+    //std::string plaintext("一个普通的山村穷小子，偶然之下，跨入到一个江湖小门派，虽然资质平庸，但依靠自身努力和合理算计最后修炼成仙的故事。");
+    
+    unsigned char plain[64] = "ZhangShiSan!!ZhangShiSan!!ZhangShiSan!!ZhangShiSan!!";
+    std::string plaintext((char*)plain,64);
+    std::string iv;
+    std::string ciphertext;
+
+    for(int i = 0; i < 16; i++)
+    {
+        iv.push_back(0x01);
+    }
+
+    printf("[1] plaintext size : %d, plaintext : %s\n", plaintext.size(), plaintext.c_str());
+    int ret = aes_cbc_encrypt(plaintext, key, iv, ciphertext);
+    if( ret != 0) {
+        printf("aes_cbc_encrypt failed, ret=%d\n", ret);
+        return ;
+    }
+
+
+    ret = aes_cbc_decrypt(ciphertext, key, iv, plaintext);
+    if( ret != 0) {
+        printf("aes_cbc_decrypt failed, ret=%d\n", ret);
+        return ;
+    }
+
+    printf("[2] plaintext size : %d, plaintext : %s\n", plaintext.size(), plaintext.c_str());    
 }
