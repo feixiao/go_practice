@@ -3,6 +3,31 @@
 
 #include "mbedtls/aes.h"
 
+int aes_cbc_encrypt(const std::string& plaintext, const std::string& key, 
+     const std::string& iv, std::string& ciphertext) {
+    
+    std::string tmp_iv(iv);
+
+        //密文空间
+    unsigned char cipher[64]={0};
+
+    mbedtls_aes_context ctx;
+    mbedtls_aes_init(&ctx);
+    
+
+    int rc = mbedtls_aes_setkey_dec(&ctx, (const unsigned char*)key.data(), key.size());
+    if( rc !=0 ) {
+        return rc;
+    }
+
+    rc = mbedtls_aes_crypt_cbc(&ctx, MBEDTLS_AES_DECRYPT, 64, iv, cipher, ciphertext);
+    if( rc != 0) {
+        return rc;
+    }
+
+    mbedtls_aes_free( &ctx );
+    return 0;
+}
 
 
 int aes_cbc_decrypt(const std::string& ciphertext, const std::string& key, const std::string& iv, std::string& plaintext)
@@ -18,10 +43,12 @@ int aes_cbc_decrypt(const std::string& ciphertext, const std::string& key, const
     const unsigned char* input = (const unsigned char*)ciphertext.data();
     unsigned char* output = (unsigned char*)plaintext.data();
 
+    
+
     mbedtls_aes_context ctx;
     mbedtls_aes_init(&ctx);
 
-    rc = mbedtls_aes_setkey_dec(&ctx, (const unsigned char*)key.data(), key.size() * 8);
+    rc = mbedtls_aes_setkey_dec(&ctx, (const unsigned char*)key.data(), key.size());
 
     rc = mbedtls_aes_crypt_cbc(&ctx,
         MBEDTLS_AES_DECRYPT,
