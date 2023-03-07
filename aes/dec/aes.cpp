@@ -3,6 +3,8 @@
 
 #include "mbedtls/aes.h"
 
+// https://blog.csdn.net/baidu_39191253/article/details/116603328
+
 int aes_cbc_encrypt(const std::string& plaintext, const std::string& key, 
      const std::string& iv, std::string& ciphertext) {
     
