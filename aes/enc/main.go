@@ -21,8 +21,8 @@ func (argv *argT) AutoHelp() bool {
 	return argv.Help
 }
 
-// 加密： ./enc -f="./data/test_01.yaml"
-// 解密： ./enc -f="./data/test_01.yaml.bin" -e=true
+// 加密： ./enc -f="../data/test.txt"
+// 解密： ./enc -f="../data/test.txt.bin" -e=true
 func main() {
 	args := &argT{}
 
