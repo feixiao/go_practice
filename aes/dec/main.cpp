@@ -4,13 +4,15 @@
 #include <fstream>
 
 #include "aes.h"
+#include "encryptor.h"
 #include "mbedtls/aes.h"
 
 using namespace std;
 
 void test();
-
 void test2();
+void test3();
+
 
 int main(int argc, char* argv[]) {
 
@@ -29,8 +31,9 @@ int main(int argc, char* argv[]) {
                 break;
         }
     }
-    test();
-    test2();
+    // test();
+    // test2();
+    test3();
 
     std::string data("12345678900987654321");
 
@@ -154,3 +157,5 @@ void test2() {
 
     printf("[2] plaintext size : %d, plaintext : %s\n", plaintext.size(), plaintext.c_str());    
 }
+
+
