@@ -5,9 +5,15 @@
 
 // https://blog.csdn.net/baidu_39191253/article/details/116603328
 
-int aes_cbc_encrypt(const std::string& plaintext, const std::string& key, 
+int aes_cbc_encrypt(std::string& plaintext, const std::string& key, 
      const std::string& iv, std::string& ciphertext) {
     
+    int pad = 16 - (plaintext.size() % 16);
+
+    for(int i = 0; i < pad; i++) {
+        plaintext.push_back((char)pad);
+    }
+
     if (ciphertext.size() < plaintext.size()) {
         ciphertext.resize(plaintext.size());
     }
@@ -27,6 +33,8 @@ int aes_cbc_encrypt(const std::string& plaintext, const std::string& key,
         return rc;
     }
 
+
+
     // MBEDTLS_ERR_AES_INVALID_INPUT_LENGTH -0x0022
     rc = mbedtls_aes_crypt_cbc(&ctx, MBEDTLS_AES_ENCRYPT, 
             plaintext.size(),   (unsigned char*)tmp_iv.data(),
@@ -43,15 +51,17 @@ int aes_cbc_encrypt(const std::string& plaintext, const std::string& key,
 int aes_cbc_decrypt(const std::string& ciphertext, const std::string& key, const std::string& iv, std::string& plaintext)
 {
     int rc = -1;
-    if (plaintext.size() < ciphertext.size()) {
-        plaintext.resize(ciphertext.size());
+    std::string old;
+    if (old.size() < ciphertext.size()) {
+        old.resize(ciphertext.size());
     }
 
     size_t newsize = ciphertext.size();
 
     std::string tmp_iv(iv);
     const unsigned char* input = (const unsigned char*)ciphertext.data();
-    unsigned char* output = (unsigned char*)plaintext.data();
+    
+    unsigned char* output = (unsigned char*)old.data();
 
     
 
@@ -67,28 +77,12 @@ int aes_cbc_decrypt(const std::string& ciphertext, const std::string& key, const
         input,
         output);
 
-    // 兼容openssl, 填充位填充的数据为填充的长度
-    // {
-    //     int fill_len = output[plaintext.size() - 1];
-    //     if (fill_len > 0 && fill_len < 16)
-    //     {
-    //         bool is_ok = true;
-    //         for (size_t i = plaintext.size() - fill_len; i < plaintext.size(); i++)
-    //         {
-    //             if (output[i] != fill_len) {
-    //                 is_ok = false;
-    //                 break;
-    //             }
-    //         }
+    int len = ciphertext.size();
+    int pad =  output[len - 1];
+    // memset(output + len - pad, 0, pad);
+    // plaintext.clear();
+    plaintext = old.substr(0, len - pad);
 
-    //         if (is_ok) {
-    //             plaintext.resize(plaintext.size() - fill_len);
-    //         }
-    //         else {
-    //             rc = -2;
-    //         }
-    //     }
-    // }
 
     mbedtls_aes_free(&ctx);
 

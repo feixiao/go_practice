@@ -4,7 +4,6 @@
 #include <fstream>
 
 #include "aes.h"
-#include "encryptor.h"
 #include "mbedtls/aes.h"
 
 using namespace std;
@@ -31,11 +30,10 @@ int main(int argc, char* argv[]) {
                 break;
         }
     }
-    // test();
-    // test2();
-    test3();
+    test();
+    test2();
 
-    std::string data("12345678900987654321");
+   // std::string data("12345678900987654321");
 
     // printf("data : %s , c2 : %s \n", data.c_str(), c2.c_str());
 
@@ -103,12 +101,12 @@ void test() {
     //                 unsigned char *output );
 
     mbedtls_aes_crypt_cbc(&aes_ctx, MBEDTLS_AES_ENCRYPT, 64, iv, plain, cipher);
-    printf("After encryption:");
-    for (i = 0; i<64; i++)
-    {
-        printf("%c", cipher[i] );            
-    }
-    printf(" -End\r\n");
+    // printf("After encryption:");
+    // for (i = 0; i<64; i++)
+    // {
+    //     printf("%c", cipher[i] );            
+    // }
+    // printf(" -End\r\n");
        
     //设置解密秘银
     mbedtls_aes_setkey_dec(&aes_ctx, key, 128);
@@ -129,10 +127,10 @@ void test2() {
     std::string key = tmp.substr(0,count);
 
     printf("key size : %d, key : %s\n", key.size(), key.c_str());
-    //std::string plaintext("一个普通的山村穷小子，偶然之下，跨入到一个江湖小门派，虽然资质平庸，但依靠自身努力和合理算计最后修炼成仙的故事。");
+    std::string plaintext("一个普通的山村穷小子，偶然之下，跨入到一个江湖小门派，虽然资质平庸，但依靠自身努力和合理算计最后修炼成仙的故事。");
     
-    unsigned char plain[64] = "ZhangShiSan!!ZhangShiSan!!ZhangShiSan!!ZhangShiSan!!";
-    std::string plaintext((char*)plain,64);
+    //unsigned char plain[64] = "ZhangShiSan!!ZhangShiSan!!ZhangShiSan!!ZhangShiSan!!";
+    //std::string plaintext((char*)plain,64);
     std::string iv;
     std::string ciphertext;
 
@@ -148,12 +146,17 @@ void test2() {
         return ;
     }
 
+    printf("[enc] in size : %d, out : %d\n", plaintext.size(), ciphertext.size());
+
+
 
     ret = aes_cbc_decrypt(ciphertext, key, iv, plaintext);
     if( ret != 0) {
         printf("aes_cbc_decrypt failed, ret=%d\n", ret);
         return ;
     }
+
+    printf("[dec] in size : %d, out : %d\n", plaintext.size(), plaintext.size());
 
     printf("[2] plaintext size : %d, plaintext : %s\n", plaintext.size(), plaintext.c_str());    
 }
