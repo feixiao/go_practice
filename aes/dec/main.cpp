@@ -2,6 +2,8 @@
 #include <string>
 #include <zlib.h>
 #include <fstream>
+#include <streambuf>
+#include <sstream> 
 
 #include "aes.h"
 #include "mbedtls/aes.h"
@@ -65,18 +67,24 @@ int main(int argc, char* argv[]) {
     std::string iv;
 
     std::string enc;
-    std::string fileBuf;
-    char buffer[1024] = {"\0"};
-    // 一直读到文件结束
-    while(inFile.read(buffer, 1024)){ 
+    
+    // char buffer[1024] = {"\0"};
+    // // 一直读到文件结束
+    // while(inFile.read(buffer, 1024)){ 
 
-        // 来取得实际读取的字符数；
-        uLong size = inFile.gcount();
+    //     // 来取得实际读取的字符数；
+    //     uLong size = inFile.gcount();
 
-        // 保存解压以后的数据流
-        fileBuf.append(buffer,size);
-    }
+    //     // 保存解压以后的数据流
+    //     fileBuf.append(buffer,size);
+    // }
 
+    std::stringstream buffer;
+    buffer << inFile.rdbuf();
+    
+    std::string fileBuf = buffer.str();
+    
+    printf("file size : %d \n", fileBuf.size());
 
     for(int i=0; i<16; i++) {
         iv.push_back(key[i]);
