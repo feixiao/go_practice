@@ -59,11 +59,9 @@ int aes_cbc_decrypt(const std::string& ciphertext, const std::string& key, const
     size_t newsize = ciphertext.size();
 
     std::string tmp_iv(iv);
-    const unsigned char* input = (const unsigned char*)ciphertext.data();
+    const unsigned char* input = (const unsigned char*)ciphertext.c_str();
     
     unsigned char* output = (unsigned char*)old.data();
-
-    
 
     mbedtls_aes_context ctx;
     mbedtls_aes_init(&ctx);
@@ -78,9 +76,9 @@ int aes_cbc_decrypt(const std::string& ciphertext, const std::string& key, const
         output);
 
     int len = ciphertext.size();
-    int pad =  output[len - 1];
-    // memset(output + len - pad, 0, pad);
-    // plaintext.clear();
+    int pad =  (int) output[len - 1];
+    memset(output + len - pad, 0, pad);
+    plaintext.clear();
     plaintext = old.substr(0, len - pad);
 
 

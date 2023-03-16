@@ -13,6 +13,19 @@ void test2();
 void test3();
 
 
+int writeFile(const std::string& file, const std::string& context) {
+    std::ofstream outFile(file, ios::out | ios::binary );
+     if(!outFile) {
+        std::cout << "outFile create failed : " << file <<std::endl;
+        return -1;
+    }
+
+    outFile.write(context.c_str(), context.size());
+    outFile.close();
+}
+
+
+
 int main(int argc, char* argv[]) {
 
     int o = 0;
@@ -30,26 +43,53 @@ int main(int argc, char* argv[]) {
                 break;
         }
     }
-    test();
+    // test();
     test2();
 
-   // std::string data("12345678900987654321");
 
-    // printf("data : %s , c2 : %s \n", data.c_str(), c2.c_str());
+    if(file.empty()) {
+        file = "/Users/frank/workspace/github/go_practice/aes/data/test.txt.bin";
+    }
 
-    // printf("file : %s \n", file.c_str());
 
-    // std::string out = file + ".txt";
-    // std::ofstream outFile(out, ios::out | ios::binary );
-    //  if(!outFile) {
-    //     std::cout << "outFile create failed" << std::endl;
-    //     return 0;
-    // }
-   
-    // printf("dst size : %ld \n", dst.size());
+    printf("input : %s \n", file.c_str());
 
-    // outFile.write(dst.c_str(), dst.size());
+     std::ifstream inFile(file,ios::in|ios::binary); 
+     if(!inFile) {
+        std::cout << "inFile create failed : " <<  file << std::endl;
+        return 0;
+    }
+
+    std::string md5("OGU1NTlmZDA2MmJmMWI5MGYwMjBmOTUzMTBiYWEyNDI=");
+    std::string key = md5.substr(0,32);
+    std::string iv;
+
+    std::string enc;
+    std::string fileBuf;
+    char buffer[1024] = {"\0"};
+    // 一直读到文件结束
+    while(inFile.read(buffer, 1024)){ 
+
+        // 来取得实际读取的字符数；
+        uLong size = inFile.gcount();
+
+        // 保存解压以后的数据流
+        fileBuf.append(buffer,size);
+    }
+
+
+    for(int i=0; i<16; i++) {
+        iv.push_back(key[i]);
+    }
+    std::string plaintext;
+    int ret = aes_cbc_decrypt(fileBuf, key, iv, plaintext);
+    if( ret != 0) {
+        printf("aes_cbc_decrypt failed, ret=%d\n", ret);
+        return -1;
+    }
+    writeFile(file + ".dec", plaintext);
   
+    printf("out : %s \n", (file + ".dec").c_str());
     return 0;
 }
 
