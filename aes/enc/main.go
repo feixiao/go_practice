@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"time"
 
 	log "github.com/feixiao/infra/log"
@@ -25,6 +26,16 @@ func (argv *argT) AutoHelp() bool {
 // 解密： ./enc -f="../data/test.txt.bin" -e=true
 func main() {
 	args := &argT{}
+
+	orig := "hello world"
+	key := "123456781234567812345678"
+	fmt.Println("原文：", orig)
+
+	encryptCode := AesEncryptPkcs7(orig, key)
+	fmt.Println("密文：", encryptCode)
+
+	decryptCode := AesDecryptPkcs7(encryptCode, key)
+	fmt.Println("解密结果：", decryptCode)
 
 	log.Info("args : %+v", *args)
 	cli.Run(args, func(ctx *cli.Context) error {
