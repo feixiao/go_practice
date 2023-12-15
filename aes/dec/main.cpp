@@ -1,11 +1,13 @@
-#include <iostream>
-#include <string>
 #include <zlib.h>
+
 #include <fstream>
+#include <iostream>
+#include <sstream>
 #include <streambuf>
-#include <sstream> 
+#include <string>
 
 #include "aes.h"
+#include "gzip.h"
 #include "mbedtls/aes.h"
 
 using namespace std;
@@ -14,199 +16,195 @@ void test();
 void test2();
 void test3();
 
-
 int writeFile(const std::string& file, const std::string& context) {
-    std::ofstream outFile(file, ios::out | ios::binary );
-     if(!outFile) {
-        std::cout << "outFile create failed : " << file <<std::endl;
-        return -1;
-    }
+  std::ofstream outFile(file, ios::out | ios::binary);
+  if (!outFile) {
+    std::cout << "outFile create failed : " << file << std::endl;
+    return -1;
+  }
 
-    outFile.write(context.c_str(), context.size());
-    outFile.close();
+  outFile.write(context.c_str(), context.size());
+  outFile.close();
 }
-
-
 
 int main(int argc, char* argv[]) {
-
-    int o = 0;
-    const char *optstring = "f:";
-    std::string file;
-    while ((o = getopt(argc, argv, optstring)) != -1) {
-        switch (o) {
-            case 'f':
-                printf("opt is f, oprarg is: %s\n", optarg);
-                file.append(optarg, strlen(optarg));
-                break;
-            case '?':
-                printf("error optopt: %c\n", optopt);
-                printf("error opterr: %d\n", opterr);
-                break;
-        }
+  int o = 0;
+  const char* optstring = "f:";
+  std::string file;
+  while ((o = getopt(argc, argv, optstring)) != -1) {
+    switch (o) {
+      case 'f':
+        printf("opt is f, oprarg is: %s\n", optarg);
+        file.append(optarg, strlen(optarg));
+        break;
+      case '?':
+        printf("error optopt: %c\n", optopt);
+        printf("error opterr: %d\n", opterr);
+        break;
     }
-    // test();
-    test2();
+  }
+  // test();
+  test2();
 
+  if (file.empty()) {
+    file = "/Users/frank/workspace/github/go_practice/aes/data/test.txt.bin";
+  }
 
-    if(file.empty()) {
-        file = "/Users/frank/workspace/github/go_practice/aes/data/test.txt.bin";
-    }
+  printf("input : %s \n", file.c_str());
 
-
-    printf("input : %s \n", file.c_str());
-
-     std::ifstream inFile(file,ios::in|ios::binary); 
-     if(!inFile) {
-        std::cout << "inFile create failed : " <<  file << std::endl;
-        return 0;
-    }
-
-    std::string md5("OGU1NTlmZDA2MmJmMWI5MGYwMjBmOTUzMTBiYWEyNDI=");
-    std::string key = md5.substr(0,32);
-    std::string iv;
-
-    std::string enc;
-    
-    // char buffer[1024] = {"\0"};
-    // // 一直读到文件结束
-    // while(inFile.read(buffer, 1024)){ 
-
-    //     // 来取得实际读取的字符数；
-    //     uLong size = inFile.gcount();
-
-    //     // 保存解压以后的数据流
-    //     fileBuf.append(buffer,size);
-    // }
-
-    std::stringstream buffer;
-    buffer << inFile.rdbuf();
-    
-    std::string fileBuf = buffer.str();
-    
-    printf("file size : %d \n", fileBuf.size());
-
-    for(int i=0; i<16; i++) {
-        iv.push_back(key[i]);
-    }
-    std::string plaintext;
-    int ret = aes_cbc_decrypt(fileBuf, key, iv, plaintext);
-    if( ret != 0) {
-        printf("aes_cbc_decrypt failed, ret=%d\n", ret);
-        return -1;
-    }
-    writeFile(file + ".dec", plaintext);
-  
-    printf("out : %s \n", (file + ".dec").c_str());
+  std::ifstream inFile(file, ios::in | ios::binary);
+  if (!inFile) {
+    std::cout << "inFile create failed : " << file << std::endl;
     return 0;
+  }
+
+  std::string md5("OGU1NTlmZDA2MmJmMWI5MGYwMjBmOTUzMTBiYWEyNDI=");
+  std::string key = md5.substr(0, 32);
+  std::string iv;
+
+  std::string enc;
+
+  // char buffer[1024] = {"\0"};
+  // // 一直读到文件结束
+  // while(inFile.read(buffer, 1024)){
+
+  //     // 来取得实际读取的字符数；
+  //     uLong size = inFile.gcount();
+
+  //     // 保存解压以后的数据流
+  //     fileBuf.append(buffer,size);
+  // }
+
+  std::stringstream buffer;
+  buffer << inFile.rdbuf();
+
+  std::string fileBuf = buffer.str();
+
+  printf("file size : %d \n", fileBuf.size());
+
+  for (int i = 0; i < 16; i++) {
+    iv.push_back(key[i]);
+  }
+  std::string plaintext;
+  int ret = aes_cbc_decrypt(fileBuf, key, iv, plaintext);
+  if (ret != 0) {
+    printf("aes_cbc_decrypt failed, ret=%d\n", ret);
+    return -1;
+  }
+  writeFile(file + ".dec", plaintext);
+
+  std::string out;
+  GZipper::Deflate(plaintext, out);
+
+  printf("out : %s \n", (file + ".dec").c_str());
+  printf("out : %s \n", out.c_str());
+  return 0;
 }
-
-
 
 void test() {
-      int i;
-    
-    mbedtls_aes_context aes_ctx;
-    
-    //秘银数值
-    unsigned char key[16] = "CBCPASSWD1234";
-    //iv
-    unsigned char iv[16];
-    
-    //明文空间
-    unsigned char plain[64] = "ZhangShiSan!!ZhangShiSan!!ZhangShiSan!!ZhangShiSan!!";
-    //解密后明文的空间
-    unsigned char dec_plain[64]={0};
+  int i;
 
-    //密文空间
-    unsigned char cipher[64]={0};
- 
-    
-    mbedtls_aes_init( &aes_ctx );
-    
-    //设置加密秘银
-    printf("\r\n\r\n\r\nAES CBC:\r\nBefore Encryption: %s\r\n", plain);
-    
-    // int mbedtls_aes_setkey_enc( mbedtls_aes_context *ctx, const unsigned char *key, unsigned int keybits );
-    // int mbedtls_aes_setkey_dec( mbedtls_aes_context *ctx, const unsigned char *key, unsigned int keybits );
+  mbedtls_aes_context aes_ctx;
 
-    // ctx：句柄
-    // key：密钥，必须16、24或32Bytes
-    // keybits：密钥长度，128、192或256bit
+  // 秘银数值
+  unsigned char key[16] = "CBCPASSWD1234";
+  // iv
+  unsigned char iv[16];
 
-    mbedtls_aes_setkey_enc( &aes_ctx, key, 128);
-    for(i = 0; i < 16; i++)
-    {
-        iv[i] = 0x01;
-    }
+  // 明文空间
+  unsigned char plain[64] =
+      "ZhangShiSan!!ZhangShiSan!!ZhangShiSan!!ZhangShiSan!!";
+  // 解密后明文的空间
+  unsigned char dec_plain[64] = {0};
 
-    // CBC加/解密，可以加密任意长度的明文（必须补齐为16的整倍数）
-    // int mbedtls_aes_crypt_cbc( mbedtls_aes_context *ctx,
-    //                 int mode,                // MBEDTLS_AES_ENCRYPT或MBEDTLS_AES_DECRYPT
-    //                 size_t length,           // 输入长度（必须补齐为16的整倍数）
-    //                 unsigned char iv[16],    // 初始化向量，必须为16字节且可读写。每个块运算完之后会生成新的向量传给下一个块运算，所以加密完成后此值会改变，解密时应该重新赋值。
-    //                 const unsigned char *input,
-    //                 unsigned char *output );
+  // 密文空间
+  unsigned char cipher[64] = {0};
 
-    mbedtls_aes_crypt_cbc(&aes_ctx, MBEDTLS_AES_ENCRYPT, 64, iv, plain, cipher);
-    // printf("After encryption:");
-    // for (i = 0; i<64; i++)
-    // {
-    //     printf("%c", cipher[i] );            
-    // }
-    // printf(" -End\r\n");
-       
-    //设置解密秘银
-    mbedtls_aes_setkey_dec(&aes_ctx, key, 128);
-    for(i = 0; i < 16; i++)
-    {
-        iv[i] = 0x01;
-    }
-    mbedtls_aes_crypt_cbc(&aes_ctx, MBEDTLS_AES_DECRYPT, 64, iv, cipher, dec_plain);
-    printf("After Decrypt %s\r\n", dec_plain);
-    printf("\r\n");
-    mbedtls_aes_free( &aes_ctx );
+  mbedtls_aes_init(&aes_ctx);
+
+  // 设置加密秘银
+  printf("\r\n\r\n\r\nAES CBC:\r\nBefore Encryption: %s\r\n", plain);
+
+  // int mbedtls_aes_setkey_enc( mbedtls_aes_context *ctx, const unsigned char
+  // *key, unsigned int keybits ); int mbedtls_aes_setkey_dec(
+  // mbedtls_aes_context *ctx, const unsigned char *key, unsigned int keybits );
+
+  // ctx：句柄
+  // key：密钥，必须16、24或32Bytes
+  // keybits：密钥长度，128、192或256bit
+
+  mbedtls_aes_setkey_enc(&aes_ctx, key, 128);
+  for (i = 0; i < 16; i++) {
+    iv[i] = 0x01;
+  }
+
+  // CBC加/解密，可以加密任意长度的明文（必须补齐为16的整倍数）
+  // int mbedtls_aes_crypt_cbc( mbedtls_aes_context *ctx,
+  //                 int mode,                //
+  //                 MBEDTLS_AES_ENCRYPT或MBEDTLS_AES_DECRYPT size_t length, //
+  //                 输入长度（必须补齐为16的整倍数） unsigned char iv[16], //
+  //                 初始化向量，必须为16字节且可读写。每个块运算完之后会生成新的向量传给下一个块运算，所以加密完成后此值会改变，解密时应该重新赋值。
+  //                 const unsigned char *input,
+  //                 unsigned char *output );
+
+  mbedtls_aes_crypt_cbc(&aes_ctx, MBEDTLS_AES_ENCRYPT, 64, iv, plain, cipher);
+  // printf("After encryption:");
+  // for (i = 0; i<64; i++)
+  // {
+  //     printf("%c", cipher[i] );
+  // }
+  // printf(" -End\r\n");
+
+  // 设置解密秘银
+  mbedtls_aes_setkey_dec(&aes_ctx, key, 128);
+  for (i = 0; i < 16; i++) {
+    iv[i] = 0x01;
+  }
+  mbedtls_aes_crypt_cbc(&aes_ctx, MBEDTLS_AES_DECRYPT, 64, iv, cipher,
+                        dec_plain);
+  printf("After Decrypt %s\r\n", dec_plain);
+  printf("\r\n");
+  mbedtls_aes_free(&aes_ctx);
 }
-
 
 void test2() {
-    std::string tmp("OGU1NTlmZDA2MmJmMWI5MGYwMjBmOTUzMTBiYWEyNDI");
-    int count = 16;
-    std::string key = tmp.substr(0,count);
+  std::string tmp("OGU1NTlmZDA2MmJmMWI5MGYwMjBmOTUzMTBiYWEyNDI");
+  int count = 16;
+  std::string key = tmp.substr(0, count);
 
-    printf("key size : %d, key : %s\n", key.size(), key.c_str());
-    std::string plaintext("一个普通的山村穷小子，偶然之下，跨入到一个江湖小门派，虽然资质平庸，但依靠自身努力和合理算计最后修炼成仙的故事。");
-    
-    //unsigned char plain[64] = "ZhangShiSan!!ZhangShiSan!!ZhangShiSan!!ZhangShiSan!!";
-    //std::string plaintext((char*)plain,64);
-    std::string iv;
-    std::string ciphertext;
+  printf("key size : %d, key : %s\n", key.size(), key.c_str());
+  std::string plaintext(
+      "一个普通的山村穷小子，偶然之下，跨入到一个江湖小门派，虽然资质平庸，但依"
+      "靠自身努力和合理算计最后修炼成仙的故事。");
 
-    for(int i = 0; i < 16; i++)
-    {
-        iv.push_back(0x01);
-    }
+  // unsigned char plain[64] =
+  // "ZhangShiSan!!ZhangShiSan!!ZhangShiSan!!ZhangShiSan!!"; std::string
+  // plaintext((char*)plain,64);
+  std::string iv;
+  std::string ciphertext;
 
-    printf("[1] plaintext size : %d, plaintext : %s\n", plaintext.size(), plaintext.c_str());
-    int ret = aes_cbc_encrypt(plaintext, key, iv, ciphertext);
-    if( ret != 0) {
-        printf("aes_cbc_encrypt failed, ret=%d\n", ret);
-        return ;
-    }
+  for (int i = 0; i < 16; i++) {
+    iv.push_back(0x01);
+  }
 
-    printf("[enc] in size : %d, out : %d\n", plaintext.size(), ciphertext.size());
+  printf("[1] plaintext size : %d, plaintext : %s\n", plaintext.size(),
+         plaintext.c_str());
+  int ret = aes_cbc_encrypt(plaintext, key, iv, ciphertext);
+  if (ret != 0) {
+    printf("aes_cbc_encrypt failed, ret=%d\n", ret);
+    return;
+  }
 
+  printf("[enc] in size : %d, out : %d\n", plaintext.size(), ciphertext.size());
 
+  ret = aes_cbc_decrypt(ciphertext, key, iv, plaintext);
+  if (ret != 0) {
+    printf("aes_cbc_decrypt failed, ret=%d\n", ret);
+    return;
+  }
 
-    ret = aes_cbc_decrypt(ciphertext, key, iv, plaintext);
-    if( ret != 0) {
-        printf("aes_cbc_decrypt failed, ret=%d\n", ret);
-        return ;
-    }
+  printf("[dec] in size : %d, out : %d\n", plaintext.size(), plaintext.size());
 
-    printf("[dec] in size : %d, out : %d\n", plaintext.size(), plaintext.size());
-
-    printf("[2] plaintext size : %d, plaintext : %s\n", plaintext.size(), plaintext.c_str());    
+  printf("[2] plaintext size : %d, plaintext : %s\n", plaintext.size(),
+         plaintext.c_str());
 }
-
-

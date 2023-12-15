@@ -27,7 +27,7 @@ func (argv *argT) AutoHelp() bool {
 func main() {
 	args := &argT{}
 
-	orig := "hello world"
+	orig := "hello world hello world hello world hello world hello world hello world hello world hello world hello world"
 	key := "123456781234567812345678"
 	fmt.Println("原文：", orig)
 
