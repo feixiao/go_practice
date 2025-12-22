@@ -50,6 +50,7 @@ Go基础库整理
 + [go-chassis](https://github.com/go-chassis/go-chassis)
 + [Tars](https://github.com/TarsCloud/Tars)
 + [kratos](https://github.com/bilibili/kratos)
++ [go-zero](https://github.com/zeromicro/go-zero)
 
 #### 音视频
 + [pion](https://github.com/pion) webrtc客户端涉及的基础库。
@@ -72,6 +73,10 @@ Go基础库整理
 
 #### 依赖注入
 + [google/wire](https://github.com/google/wire) 编译时依赖注入
+
+
+#### MCP
++ [mcp-zero](https://github.com/zeromicro/mcp-zero) Model Context Protocol (MCP) server for go-zero framework - Generate APIs, RPC services, and models with AI assistance.
 
 
 ### 简单项目
