@@ -1,0 +1,9 @@
+# go-queue Kafka 配置
+Name: go-python-demo
+Brokers:
+  - 127.0.0.1:9092
+Group: go-python-group
+Topic: go-python-topic
+Offset: first
+Consumers: 2
+Processors: 4

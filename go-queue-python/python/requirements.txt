@@ -1,0 +1,2 @@
+# Python Kafka 客户端，用于与 go-zero go-queue 交互
+kafka-python==2.0.2
